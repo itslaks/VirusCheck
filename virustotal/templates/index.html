@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INFOSIGHT - Website Vulnerability Scanner</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        form {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .results-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .result-column {
+            flex: 1;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .result-box {
+            background-color: #e9f5f5;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease-in-out;
+            margin-bottom: 15px;
+        }
+        .result-box:hover {
+            transform: scale(1.02);
+        }
+        h2 {
+            color: #333;
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+        }
+        ul {
+            padding: 0;
+            margin: 10px 0;
+            list-style-type: none;
+        }
+        ul li {
+            margin-bottom: 5px;
+        }
+        .error-box {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>INFOSIGHT - Website Vulnerability Scanner</h1>
+        <form id="scan-form" action="/scan" method="post">
+            <label for="website">Enter Website URL or Domain:</label><br>
+            <input type="text" id="website" name="website" required><br><br>
+            <button type="submit">Scan</button>
+        </form>
+        <div class="results-container">
+            <div class="result-column" id="positive-results">
+                <h2>Positive Results:</h2>
+            </div>
+            <div class="result-column" id="negative-results">
+                <h2>Negative Results:</h2>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('scan-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            fetch('/scan', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const positiveResultsDiv = document.getElementById('positive-results');
+                const negativeResultsDiv = document.getElementById('negative-results');
+                positiveResultsDiv.innerHTML = '';
+                negativeResultsDiv.innerHTML = '';
+
+                if (data.error) {
+                    negativeResultsDiv.innerHTML = `<div class="error-box">${data.error}</div>`;
+                } else {
+                    data.positives.forEach(result => {
+                        positiveResultsDiv.innerHTML += `
+                            <div class="result-box">
+                                <ul><li>${result}</li></ul>
+                            </div>`;
+                    });
+                    data.negatives.forEach(result => {
+                        negativeResultsDiv.innerHTML += `
+                            <div class="result-box">
+                                <ul><li>${result}</li></ul>
+                            </div>`;
+                    });
+                }
+            })
+            .catch(error => {
+                const positiveResultsDiv = document.getElementById('positive-results');
+                const negativeResultsDiv = document.getElementById('negative-results');
+                positiveResultsDiv.innerHTML = '';
+                negativeResultsDiv.innerHTML = `<div class="error-box">An error occurred: ${error.message}</div>`;
+            });
+        });
+    </script>
+</body>
+</html>
